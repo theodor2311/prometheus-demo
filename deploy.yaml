@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus-demo
+spec:
+  selector:
+    matchLabels:
+      app: prometheus-demo
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: prometheus-demo
+    spec:
+      containers:
+        - name: prometheus-demo
+          image: docker.io/theodor2311/prometheus-demo:latest
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus-demo
+  labels:
+    app: prometheus-demo
+spec:
+  selector:
+    app: prometheus-demo
+  ports:
+    - protocol: TCP
+      port: 8080
+      name: web
+      targetPort: 8080
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: prometheus-demo
+spec:
+  port:
+    targetPort: 8080
+  to:
+    kind: Service
+    name: prometheus-demo
+    weight: 100
